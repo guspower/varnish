@@ -1,0 +1,75 @@
+version='0.1-SNAPSHOT'
+group='com.energizedwork'
+
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
+grailsVersion = '1.3.6'
+grailsHome = "/opt/grails-$grailsVersion"
+
+defaultTasks 'clean', 'test' 
+
+apply plugin: 'groovy'
+
+repositories {
+    flatDir name: 'grailsDist', dirs: "$grailsHome/dist"
+    flatDir name: 'grailsLib', dirs: "$grailsHome/lib"
+    add(new org.apache.ivy.plugins.resolver.FileSystemResolver()) {
+        name = 'ewRepo'
+        addIvyPattern "/var/www/repo.energizedwork.com/htdocs/[organisation]/[module]-ivy-[revision].xml"
+        addArtifactPattern "/var/www/repo.energizedwork.com/htdocs/[organisation]/[module]-[revision](-[classifier]).[ext]"
+        descriptor = 'optional'
+        checkmodified = true
+    }
+    mavenCentral()
+    mavenRepo urls:'http://m2repo.spockframework.org'
+}
+
+uploadArchives {
+    uploadDescriptor = false
+    repositories {
+        add project.repositories.ewRepo
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+     classifier = 'sources'
+     from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn:groovydoc) {
+     classifier = 'javadoc'
+     from groovydoc.destinationDir
+}
+
+artifacts {
+     archives sourcesJar
+     archives javadocJar
+}
+
+dependencies {
+    groovy group: 'org.codehaus.groovy', name: 'groovy', version: '1.7.5'
+
+    compile  ':grails-bootstrap:1.3.6',
+        ':grails-core:1.3.6',
+        ':grails-crud:1.3.6',
+        ':grails-docs:1.3.6',
+        ':grails-gorm:1.3.6',
+        ':grails-osgi:1.3.6',
+        ':grails-resources:1.3.6',
+        ':grails-scripts:1.3.6',
+        ':grails-spring:1.3.6',
+        ':grails-test:1.3.6',
+        ':grails-web:1.3.6',
+        ':grails-webflow:1.3.6',
+        ':commons-lang:2.4',
+        ':log4j:1.2.16',
+        ':org.springframework.context:3.0.5.RELEASE',
+        ':org.springframework.context.support:3.0.5.RELEASE',
+        ':org.springframework.core:3.0.5.RELEASE',
+        ':org.springframework.web:3.0.5.RELEASE',
+        ':org.springframework.web.servlet:3.0.5.RELEASE',
+        ':servlet-api:2.5',
+        'commons-logging:commons-logging:1.1.1',
+        'org.spockframework:spock-grails-support:0.5-groovy-1.7',
+        'org.codehaus.groovy.modules.http-builder:http-builder:0.5.1'
+}
